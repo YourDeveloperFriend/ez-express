@@ -7,9 +7,14 @@ import {ServerError} from 'ez-error';
 
 let methods = ['get', 'put', 'post', 'delete'];
 
+let defaultOptions = {
+  baseRoute: ''
+};
+
 class ExpressHandler {
-  constructor(expressApp) {
+  constructor(expressApp, options) {
     this.expressApp = expressApp;
+    this.options = _.defaults(options, defaultOptions);
     this.controllers = {};
   }
   registerControllers(controllers) {
@@ -146,7 +151,7 @@ class ExpressHandler {
   }
   registerRoute(routeName, routeDetails, Controller) {
     let idPattern;
-    let basePattern = '/' + Controller.tableName;
+    let basePattern = this.options.baseRoute + '/' + Controller.tableName;
     if(Controller.idRegex) {
       idPattern = idRegex === false ? '' : `(${idRegex})`;
     } else {
