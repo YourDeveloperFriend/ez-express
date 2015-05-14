@@ -95,7 +95,7 @@ describe('Express Controller', ()=> {
       response.should.have.property('error', 'ServerError');
       delete UserController.serverError;
     });
-    it('should be able to handle status errors', async function() {
+    it.only('should be able to handle status errors', async function() {
       var response = await makeRequest('/users/13', {
         expectedStatus: 404
       });

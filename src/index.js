@@ -3,7 +3,7 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import inflection from 'inflection';
 import path from 'path';
-import UserError, {ServerError} from 'ez-error';
+import {ServerError} from 'ez-error';
 
 let methods = ['get', 'put', 'post', 'delete'];
 
@@ -76,7 +76,7 @@ class ExpressHandler {
         try {
           response.result = await this.runRoute();
         } catch(error) {
-          if(!(error instanceof UserError)) {
+          if(!error.isUserError) {
             await this.runLifeCycleMethod('onServerError', this.error);
             error = new ServerError();
           }
