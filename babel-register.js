@@ -1,3 +1,3 @@
 
-require('babel/register')({experimental: true});
+require('babel/register')({stage: 0});
 require('bluebird').longStackTraces();
