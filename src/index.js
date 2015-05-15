@@ -150,8 +150,20 @@ class ExpressHandler {
     }
   }
   registerRoute(routeName, routeDetails, Controller) {
+    let routeInfo = this.constructor.getRoutingInfo(Controller, routeName, routeDetails, this.options.baseRoute);
+    let {finishStatus, method, pattern} = routeInfo;
+    this.expressApp[method](pattern, (req, res)=> {
+      let controller = new Controller(routeName);
+      controller.finishStatus = finishStatus;
+      controller.runExpressRouteAndRender(req, res).catch(function(error) {
+        console.log('MajorServerError:', error.stack);
+        res.status(500).end();
+      }).catch(console.error.bind(console));
+    });
+  }
+  static getRoutingInfo(Controller, routeName, routeDetails, baseRoute = '') {
     let idPattern;
-    let basePattern = this.options.baseRoute + '/' + Controller.tableName;
+    let basePattern = baseRoute + '/' + Controller.tableName;
     if(Controller.idRegex) {
       idPattern = idRegex === false ? '' : `(${idRegex})`;
     } else {
@@ -213,17 +225,16 @@ class ExpressHandler {
         }
         pattern += `/${remainingRoute}`;
     }
-    pattern += '(\.(json|html|csv|txt))?';
+    let pathPattern;
+    if(routeDetails.pattern) {
+      pattern = routeDetails.pattern;
+      pathPattern = routeDetails.pathPattern;
+    } else {
+      pathPattern = pattern;
+      pattern += '(\.(json|html|csv|txt))?';
+    }
     method = routeDetails.method || method;
-    pattern = routeDetails.pattern || pattern;
-    this.expressApp[method](pattern, (req, res)=> {
-      let controller = new Controller(routeName);
-      controller.finishStatus = finishStatus;
-      controller.runExpressRouteAndRender(req, res).catch(function(error) {
-        console.log('MajorServerError:', error.stack);
-        res.status(500).end();
-      }).catch(console.error.bind(console));
-    });
+    return {pattern, method, pathPattern, finishStatus};
   }
 };
 
